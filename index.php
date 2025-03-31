@@ -1,7 +1,7 @@
 <?php
 session_start(); // Запускаем сессию
-include 'includes/db.php';
-include 'includes/header.php';
+include './includes/db.php';
+include './includes/header.php';
 
 // Инициализация корзины в сессии
 if (!isset($_SESSION['cart'])) {
@@ -191,4 +191,4 @@ $totalQuantity = getTotalCartQuantity();
 
 
 
-<?php include 'includes/footer.php'; ?>
+<?php include './includes/footer.php'; ?>

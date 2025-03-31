@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'includes/db.php';
+include './includes/db.php';
 
 // Инициализация корзины в сессии
 if (!isset($_SESSION['cart'])) {
@@ -88,7 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
 
         // Очищаем корзину
         $_SESSION['cart'] = [];
-
         // Уведомление об успешном создании заказа
         $_SESSION['success'] = "Заказ успешно создан! Вы можете просмотреть его в личном кабинете.";
         header("Location: cart.php");
@@ -99,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
 
 
 <main class="flex flex-col min-h-[100vh]">
-    <?php include 'includes/header.php'; ?>
+    <?php include './includes/header.php'; ?>
 
     <section class="container flex-[1] mx-auto p-4 mt-10">
 
@@ -134,31 +133,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
             <p class="text-center text-gray-600">Корзина пуста.</p>
         <?php endif; ?>
 
-        <!-- Форма для оформления заказа -->
-        <form method="POST" action="" class="mt-10" id="order-form">
-            <h2 class="text-2xl font-bold mb-4">Оформление заказа</h2>
+        <?php
 
-            <?php if (isset($error)): ?>
-                <p class="text-red-500 mb-4"><?= htmlspecialchars($error) ?></p>
-            <?php endif; ?>
+        if (isset($_SESSION['user_id'])) {
+        ?>
 
-            <div class="mb-4">
-                <label for="customer_name" class="block text-gray-700 font-bold mb-2">Имя</label>
-                <input type="text" name="customer_name" id="customer_name" class="w-full px-3 py-2 border rounded-lg" required pattern="^[a-zA-Zа-яА-ЯёЁ\s]+$" title="Имя может содержать только буквы.">
-            </div>
-            <div class="mb-4">
-                <label for="phone" class="block text-gray-700 font-bold mb-2">Телефон</label>
-                <input type="text" name="phone" id="phone" class="w-full px-3 py-2 border rounded-lg" required pattern="^\+?[78]\d{10}$" title="Номер телефона должен быть в формате +7XXXXXXXXXX или 8XXXXXXXXXX.">
-            </div>
-            <div class="mb-4">
-                <label for="address" class="block text-gray-700 font-bold mb-2">Адрес доставки</label>
-                <textarea name="address" id="address" rows="3" class="w-full px-3 py-2 border rounded-lg" required></textarea>
+            <!-- Форма для оформления заказа -->
+            <form method="POST" action="" class="mt-10" id="order-form">
+                <h2 class="text-2xl font-bold mb-4">Оформление заказа</h2>
+
+                <?php if (isset($error)): ?>
+                    <p class="text-red-500 mb-4"><?= htmlspecialchars($error) ?></p>
+                <?php endif; ?>
+
+                <div class="mb-4">
+                    <label for="customer_name" class="block text-gray-700 font-bold mb-2">Имя</label>
+                    <input type="text" name="customer_name" id="customer_name" class="w-full px-3 py-2 border rounded-lg" required pattern="^[a-zA-Zа-яА-ЯёЁ\s]+$" title="Имя может содержать только буквы.">
+                </div>
+                <div class="mb-4">
+                    <label for="phone" class="block text-gray-700 font-bold mb-2">Телефон</label>
+                    <input type="text" name="phone" id="phone" class="w-full px-3 py-2 border rounded-lg" required pattern="^\+?[78]\d{10}$" title="Номер телефона должен быть в формате +7XXXXXXXXXX или 8XXXXXXXXXX.">
+                </div>
+                <div class="mb-4">
+                    <label for="address" class="block text-gray-700 font-bold mb-2">Адрес доставки</label>
+                    <textarea name="address" id="address" rows="3" class="w-full px-3 py-2 border rounded-lg" required></textarea>
+                </div>
+
+                <button type="submit" name="create_order" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-secondary transition">
+                    Оформить заказ
+                </button>
+            </form>
+        <?php
+        } else {
+        ?>
+
+            <div class="w-full m-5">
+                <div class="w-fit mx-auto p-5 bg-yellow-100">
+                    <p class="text-[#333333] font-medium">Чтобы подать заявку на заказ нужно <a class="link !text-yellow-900" href="./login.php">войти</a> или <a class="link !text-yellow-900" href="./register.php">зарегистрироваться</a></p>
+                </div>
             </div>
 
-            <button type="submit" name="create_order" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-secondary transition">
-                Оформить заказ
-            </button>
-        </form>
+        <?php
+        }
+
+        ?>
 
         <script>
             document.addEventListener('DOMContentLoaded', () => {
@@ -194,7 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
         </script>
     </section>
 
-    <?php include 'includes/footer.php'; ?>
+    <?php include './includes/footer.php'; ?>
 
 
     <script>

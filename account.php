@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'includes/db.php';
+include './includes/db.php';
 
 // Проверка авторизации
 if (!isset($_SESSION['user_id'])) {
@@ -36,7 +36,7 @@ function getOrderItems($pdo, $order_id)
 
 <main class="flex flex-col min-h-[100vh]">
 
-    <?php include 'includes/header.php'; ?>
+    <?php include './includes/header.php'; ?>
 
     <section class="flex-[1] container mx-auto p-4 mt-10">
         <h1 class="text-3xl font-bold text-center mb-6">Личный кабинет</h1>
@@ -89,5 +89,5 @@ function getOrderItems($pdo, $order_id)
         <?php endif; ?>
     </section>
 
-    <?php include 'includes/footer.php'; ?>
+    <?php include './includes/footer.php'; ?>
 </main class="flex flex-col min-w-[100vh]">

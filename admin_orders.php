@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'includes/db.php';
+include './includes/db.php';
 
 // Проверка авторизации и роли
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -33,7 +33,7 @@ $orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
 
 <main class="flex flex-col min-h-[100vh]">
 
-    <?php include 'includes/header.php'; ?>
+    <?php include './includes/header.php'; ?>
 
     <section class="container mx-auto p-4 mt-10 flex-[1]">
         <h1 class="text-3xl font-bold text-center mb-6">Подтверждение заявок<h1>
@@ -91,6 +91,6 @@ $orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
                 </div>
     </section>
 
-    <?php include 'includes/footer.php'; ?>
+    <?php include './includes/footer.php'; ?>
 
 </main>

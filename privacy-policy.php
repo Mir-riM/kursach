@@ -1,5 +1,5 @@
 <div class="flex flex-col min-h-[100vh]">
-    <?php include 'includes/header.php'; ?>
+    <?php include './includes/header.php'; ?>
 
     <main class="h-max container mx-auto p-4 mt-10 flex-[1]">
         <h1 class="text-3xl font-bold text-center text-accent mb-6">Политика конфиденциальности</h1>
@@ -105,5 +105,5 @@
         </div>
     </main>
 
-    <?php include 'includes/footer.php'; ?>
+    <?php include './includes/footer.php'; ?>
 </div>

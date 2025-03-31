@@ -1,5 +1,5 @@
 <?php
-session_start(); // Запускаем сессию
+// session_start(); // Запускаем сессию
 ?>
 
 <!DOCTYPE html>
