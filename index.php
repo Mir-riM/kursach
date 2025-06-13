@@ -65,9 +65,9 @@ $totalQuantity = getTotalCartQuantity();
 
 <section class="bg-[url('./assets/img/welcome.jpg')] w-full min-h-[300px] md:min-h-[600px] py-20 px-10 text-center">
     <div class="text-left max-w-[800px]">
-        <h1 class="heading-lg text-white">Coffee & Cozy</h1>
+        <h1 class="heading-lg text-white">Тепло и уют</h1>
         <p class="mt-5 subtitle text-white">
-            Мы создали Coffee & Cozy для тех, кто ценит качество и уют. В нашем пространстве соединились искусство
+            Мы создали Тепло и уют для тех, кто ценит качество и уют. В нашем пространстве соединились искусство
             кофейного мастерства и теплая домашняя атмосфера. Приходите насладиться тщательно сваренным кофе из отборных
             зерен, попробовать наши фирменные десерты и зарядиться позитивной энергией в окружении приятной музыки и
             стильного интерьера.
@@ -82,24 +82,28 @@ $totalQuantity = getTotalCartQuantity();
         <div class="mb-8">
             <h2 class="heading-md text-center font-bold text-accent mb-10"><?= htmlspecialchars($category['name']) ?></h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <!-- Вывод товаров для текущей категории -->
                 <?php foreach ($products as $product): ?>
                     <?php if ($product['category_id'] == $category['id']): ?>
-                        <div class="border rounded-lg overflow-hidden shadow-md product-card"
-                            data-product-id="<?= $product['id'] ?>">
+                        <div class="border rounded-lg overflow-hidden shadow-md relative group">
+                            <a href="product.php?id=<?= $product['id'] ?>" class="absolute inset-0 z-10"></a>
                             <img src="<?= htmlspecialchars($product['image_url']) ?>"
                                 alt="<?= htmlspecialchars($product['name']) ?>" class="w-full h-48 object-cover">
-                            <div class="p-5">
+                            <div class="p-5 relative z-20">
                                 <h2 class="text-xl font-bold line-clamp-2 h-[60px]"><?= htmlspecialchars($product['name']) ?></h2>
                                 <p class="text-gray-600 h-[48px] line-clamp-2"><?= htmlspecialchars($product['description']) ?></p>
-                                <p class="text-accent font-bold mt-2"><?= htmlspecialchars($product['price']) ?>₽</p>
-                                <button class="btn mt-5 add-to-cart" data-product-id="<?= $product['id'] ?>">Добавить в
-                                    корзину</button>
+                                <div class="w-full flex justify-between mt-2">
+                                    <p class="text-accent font-bold "><?= htmlspecialchars($product['price']) ?>₽</p>
+                                    <p class="text-secondary font-medium"><?= htmlspecialchars($product['weight']) ?>г.</p>
+                                </div>
+                                <button class="btn mt-5 add-to-cart relative z-30" data-product-id="<?= $product['id'] ?>">
+                                    Добавить в корзину
+                                </button>
                             </div>
                         </div>
                     <?php endif; ?>
                 <?php endforeach; ?>
             </div>
+
         </div>
     <?php endforeach; ?>
 </article>

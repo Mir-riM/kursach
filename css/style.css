@@ -198,3 +198,37 @@ i {
 .btn:active {
   background: var(--link-dark-active);
 }
+
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 200px;
+  outline: none;
+}
+
+select:focus {
+  border-color: var(--accent);
+}
+
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.select-wrapper::after {
+  content: "▼";
+  font-size: 1rem;
+  right: 12px;
+  line-height: 1;
+  position: absolute;
+}
+
+input,
+textarea {
+  outline: none;
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--accent);
+}

@@ -94,12 +94,14 @@ $products = $stmtProducts->fetchAll(PDO::FETCH_ASSOC);
             </div>
             <div class="mb-4">
                 <label for="category_id" class="block text-gray-700 font-bold mb-2">Категория</label>
-                <select name="category_id" id="category_id" class="w-full px-3 py-2 border rounded-lg" required>
-                    <option value="">Выберите категорию</option>
-                    <?php foreach ($categories as $category): ?>
-                        <option value="<?= htmlspecialchars($category['id']) ?>"><?= htmlspecialchars($category['name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
+                <div class="select-wrapper">
+                    <select name="category_id" id="category_id" class="w-full px-3 py-2 border rounded-lg" required>
+                        <option value="">Выберите категорию</option>
+                        <?php foreach ($categories as $category): ?>
+                            <option value="<?= htmlspecialchars($category['id']) ?>"><?= htmlspecialchars($category['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             </div>
             <div class="mb-4">
                 <label for="image" class="block text-gray-700 font-bold mb-2">Изображение</label>

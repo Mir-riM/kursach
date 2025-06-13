@@ -2,7 +2,7 @@
     <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-5">
         <!-- Левая часть: Название сайта -->
         <div class="text-center md:text-left mb-4 md:mb-0 w-fit">
-            <p class="text-lg font-bold">Coffee & Cozy</p>
+            <p class="text-lg font-bold">Тепло и уют</p>
             <p class="text-sm text-gray-400">Ваше уютное место для кофе и десертов</p>
         </div>
 
@@ -16,7 +16,7 @@
 
 
     <div class="mt-6 border-t border-gray-800 pt-4 text-center text-sm text-gray-400">
-        &copy; <?= date('Y') ?> Coffee & Cozy. Все права защищены.
+        &copy; <?= date('Y') ?> Тепло и уют. Все права защищены.
     </div>
 </footer>
 </body>

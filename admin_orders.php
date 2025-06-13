@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 
 // Получение списка заказов
 $stmtOrders = $pdo->query("
-    SELECT o.id AS order_id, o.status, o.total_price, o.created_at, u.username 
+    SELECT o.id AS order_id, o.status, o.total_price, o.created_at, u.username, o.payment_type, o.comment 
     FROM orders o 
     LEFT JOIN users u ON o.user_id = u.id 
     ORDER BY o.created_at desc
@@ -58,30 +58,32 @@ $orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
                             <p class="text-accent font-bold">Статус:
 
                                 <?php
-                                switch (htmlspecialchars($order['status'])) {
-                                    case 'approved':
-                                        echo htmlspecialchars("Подтверждено");
-                                        break;
-                                    case 'pending':
-                                        echo htmlspecialchars("В ожидании");
-                                        break;
-                                    case 'rejected':
-                                        echo htmlspecialchars("Отменено");
-                                        break;
-                                }
+                                echo $order['status'];
                                 ?>
 
                             </p>
                             <p class="text-accent font-bold">Общая стоимость: <?= htmlspecialchars($order['total_price']) ?>₽</p>
                             <p class="text-gray-600">Дата: <?= htmlspecialchars($order['created_at']) ?></p>
+                            <p class="text-gray-600">Способ оплаты: <?= htmlspecialchars($order['payment_type']) ?></p>
+                            <p class="text-gray-600">Комментарий:
+                                <?php if ($order['comment']) {
+                                    echo htmlspecialchars($order['comment']);
+                                } else {
+                                    echo htmlspecialchars("Без комментария");
+                                } ?></p>
 
-                            <form method="POST" action="" class="mt-4">
+                            <form method="POST" action="" class="mt-4 flex gap-5">
                                 <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
-                                <select name="status" class="px-3 py-2 border rounded-lg mr-2">
-                                    <option value="pending" <?= $order['status'] === 'pending' ? 'selected' : '' ?>>В ожидании</option>
-                                    <option value="approved" <?= $order['status'] === 'approved' ? 'selected' : '' ?>>Одобрено</option>
-                                    <option value="rejected" <?= $order['status'] === 'rejected' ? 'selected' : '' ?>>Отклонено</option>
-                                </select>
+                                <div class="select-wrapper">
+                                    <select name="status" class="w-full md:w-auto px-4 py-2 border rounded-lg  bg-white text-gray-700">
+                                        <option value="В ожидании" <?= $order['status'] === 'В ожидании' ? 'selected' : '' ?>>В ожидании</option>
+                                        <option value="Завершен" <?= $order['status'] === 'Завершен' ? 'selected' : ''  ?>>Завершен</option>
+                                        <option value="Отклонён" <?= $order['status'] === 'Отклонён' ? 'selected' : '' ?>>Отклонён</option>
+                                        <option value="Готовится" <?= $order['status'] === 'Готовится' ? 'selected' : '' ?>>Готовится</option>
+                                        <option value="В доставке" <?= $order['status'] === 'В доставке' ? 'selected' : '' ?>>В доставке</option>
+
+                                    </select>
+                                </div>
                                 <button type="submit" name="update_status" class="btn bg-primary text-white py-2 px-4 rounded-lg hover:bg-secondary transition">
                                     Обновить статус
                                 </button>

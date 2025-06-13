@@ -7,49 +7,27 @@ if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
-// Обработка AJAX-запросов
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    $action = $_POST['action'];
-    $productId = (int)($_POST['product_id'] ?? 0);
-
-    if ($action === 'increase' && $productId > 0) {
-        // Увеличение количества товара
-        if (isset($_SESSION['cart'][$productId])) {
-            $_SESSION['cart'][$productId]['quantity'] += 1;
-            echo json_encode(['success' => true, 'message' => 'Количество товара увеличено']);
-            exit;
-        }
-    } elseif ($action === 'decrease' && $productId > 0) {
-        // Уменьшение количества товара
-        if (isset($_SESSION['cart'][$productId])) {
-            $_SESSION['cart'][$productId]['quantity'] -= 1;
-
-            if ($_SESSION['cart'][$productId]['quantity'] <= 0) {
-                unset($_SESSION['cart'][$productId]);
-            }
-
-            echo json_encode(['success' => true, 'message' => 'Количество товара уменьшено']);
-            exit;
-        }
-    } elseif ($action === 'remove' && $productId > 0) {
-        // Удаление товара из корзины
-        if (isset($_SESSION['cart'][$productId])) {
-            unset($_SESSION['cart'][$productId]);
-            echo json_encode(['success' => true, 'message' => 'Товар удален из корзины']);
-            exit;
-        }
-    }
-}
-
 // Обработка создания заказа
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
     $customer_name = trim($_POST['customer_name']);
     $phone = trim($_POST['phone']);
-    $address = trim($_POST['address']);
+    $address = htmlspecialchars(trim($_POST['address']));
+    $payment_type = $_POST['payment_type'];
+    $comment = !empty($_POST['comment']) ? htmlspecialchars(trim($_POST['comment'])) : null;
+
+    if ($payment_type === 'Онлайн') {
+        $card_number = trim($_POST['card_number'] ?? '');
+        $card_expiry = trim($_POST['card_expiry'] ?? '');
+        $card_cvv = trim($_POST['card_cvv'] ?? '');
+
+        if (empty($card_number) || empty($card_expiry) || empty($card_cvv)) {
+            $error = "Пожалуйста, заполните все поля данных карты.";
+        }
+    }
 
     // Валидация имени
-    if (!preg_match('/^[a-zA-Zа-яА-ЯёЁ\s]+$/', $customer_name)) {
-        $error = "Имя может содержать только буквы.";
+    if (!preg_match('/^[a-zA-Zа-яА-ЯёЁ ]+$/u', $customer_name)) {
+        $error = "Имя может содержать только буквы и пробелы.";
     }
     // Валидация телефона
     elseif (!preg_match('/^\+?[78]\d{10}$/', $phone)) {
@@ -58,6 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
     // Проверка адреса
     elseif (empty($address)) {
         $error = "Адрес доставки обязателен для заполнения.";
+    }
+    // Проверка типа оплаты
+    elseif ($payment_type !== 'Онлайн' && $payment_type !== 'Наличными') {
+        $error = "Некорректный тип оплаты.";
     }
     // Проверка корзины
     elseif (empty($_SESSION['cart'])) {
@@ -71,10 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
 
         // Создаем заказ
         $stmt = $pdo->prepare("
-            INSERT INTO orders (user_id, customer_name, phone, address, total_price)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO orders 
+            (user_id, customer_name, phone, address, payment_type, comment, total_price) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
-        $stmt->execute([$_SESSION['user_id'] ?? null, $customer_name, $phone, $address, $total_price]);
+        $stmt->execute([$_SESSION['user_id'] ?? null, $customer_name, $phone, $address, $payment_type, $comment, $total_price]);
         $order_id = $pdo->lastInsertId();
 
         // Добавляем товары в таблицу order_items
@@ -88,11 +71,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
 
         // Очищаем корзину
         $_SESSION['cart'] = [];
-        // Уведомление об успешном создании заказа
-        $_SESSION['success'] = "Заказ успешно создан! Вы можете просмотреть его в личном кабинете.";
+
+
+        $_SESSION['success'] = "Заказ успешно создан! Курьер свяжется с вами для подтверждения.";
         header("Location: cart.php");
         exit;
     }
+}
+
+$total_cart_price = 0;
+foreach ($_SESSION['cart'] as $item) {
+    $total_cart_price += $item['price'] * $item['quantity'];
 }
 ?>
 
@@ -121,14 +110,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
                             <p class="text-gray-600"><?= htmlspecialchars($item['price']) ?>₽</p>
                         </div>
                         <div class="flex items-center space-x-2 gap-5">
-                            <button class="btn-increase size-8 flex leading-[0] justify-center items-center rounded-full bg-gray-200 hover:bg-gray-400 active:bg-gray-600 transition text-2xl" data-product-id="<?= $item['id'] ?>">+</button>
+                            <button class="btn-increase size-8 flex leading-[0] justify-center items-center rounded-full bg-gray-200 hover:bg-gray-300 active:bg-gray-400 transition text-2xl" data-product-id="<?= $item['id'] ?>">+</button>
                             <p class="text-accent font-bold quantity-display" data-product-id="<?= $item['id'] ?>"><?= $item['quantity'] ?></p>
-                            <button class="btn-decrease size-8 flex leading-[0] justify-center items-center rounded-full bg-gray-200 hover:bg-gray-400 active:bg-gray-600 transition text-2xl" data-product-id="<?= $item['id'] ?>">-</button>
-                            <button class="btn-remove !ml-5 size-8 flex leading-[0] justify-center items-center rounded-full bg-rose-500 hover:bg-rose-600 active:bg-rose-800 transition text-l" data-product-id="<?= $item['id'] ?>">✕</button>
+                            <button class="btn-decrease size-8 flex leading-[0] justify-center items-center rounded-full bg-gray-200 hover:bg-gray-300 active:bg-gray-400 transition text-2xl" data-product-id="<?= $item['id'] ?>">-</button>
+                            <button class="btn-remove !ml-5 size-8 flex leading-[0] justify-center items-center rounded-full bg-gray-200 hover:bg-gray-300 active:bg-gray-400 transition text-l" data-product-id="<?= $item['id'] ?>">✕</button>
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
+
+
+            <!-- Общая сумма -->
+            <div class="mt-6 text-right">
+                <p class="text-xl font-bold">Итого: <span id="total-price"><?= number_format($total_cart_price, 2, ',', ' ') ?></span> ₽</p>
+            </div>
+
+
         <?php else: ?>
             <p class="text-center text-gray-600">Корзина пуста.</p>
         <?php endif; ?>
@@ -139,7 +136,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
         ?>
 
             <!-- Форма для оформления заказа -->
-            <form method="POST" action="" class="mt-10" id="order-form">
+            <form method="POST" action="" class="mt-10 <?php if (empty($_SESSION['cart'])) {
+                                                            echo "hidden";
+                                                        } ?> " id="order-form">
                 <h2 class="text-2xl font-bold mb-4">Оформление заказа</h2>
 
                 <?php if (isset($error)): ?>
@@ -148,15 +147,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
 
                 <div class="mb-4">
                     <label for="customer_name" class="block text-gray-700 font-bold mb-2">Имя</label>
-                    <input type="text" name="customer_name" id="customer_name" class="w-full px-3 py-2 border rounded-lg" required pattern="^[a-zA-Zа-яА-ЯёЁ\s]+$" title="Имя может содержать только буквы.">
+                    <input placeholder="Иван" type="text" name="customer_name" id="customer_name" class="w-full px-3 py-2 border rounded-lg" required pattern="^[a-zA-Zа-яА-ЯёЁ\s]+$" title="Имя может содержать только буквы.">
                 </div>
                 <div class="mb-4">
                     <label for="phone" class="block text-gray-700 font-bold mb-2">Телефон</label>
-                    <input type="text" name="phone" id="phone" class="w-full px-3 py-2 border rounded-lg" required pattern="^\+?[78]\d{10}$" title="Номер телефона должен быть в формате +7XXXXXXXXXX или 8XXXXXXXXXX.">
+                    <input placeholder="+7 (XXX) XXX-XX-XX" type="text" name="phone" id="phone" class="w-full px-3 py-2 border rounded-lg" required pattern="^\+?[78]\d{10}$" title="Номер телефона должен быть в формате +7XXXXXXXXXX или 8XXXXXXXXXX.">
                 </div>
+
+                <div class="mb-4">
+                    <label for="payment_type" class="block text-gray-700 font-bold mb-2">Тип оплаты</label>
+                    <div class="select-wrapper">
+                        <select name="payment_type" id="payment_type" class="w-full px-3 py-2 border rounded-lg" required>
+                            <option value="">Выберите способ оплаты</option>
+                            <option value="Онлайн">Онлайн</option>
+                            <option value="Наличными">Наличными</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="payment-card-block" class="hidden mt-6 mb-4 p-4 border rounded-lg bg-gray-50">
+                    <h3 class="text-lg font-bold mb-4">Введите данные карты</h3>
+
+                    <div class="mb-4">
+                        <label for="card-number" class="block text-gray-700 font-bold mb-2">Номер карты</label>
+                        <input type="text" id="card-number" name="card_number" placeholder="1234 1234 1234 1234" class="w-full px-3 py-2 border rounded-lg" maxlength="19">
+                    </div>
+
+                    <div class="flex gap-4 mb-4">
+                        <div class="w-1/2">
+                            <label for="card-expiry" class="block text-gray-700 font-bold mb-2">Срок действия</label>
+                            <input type="text" id="card-expiry" name="card_expiry" placeholder="ММ/ГГ" class="w-full px-3 py-2 border rounded-lg" maxlength="5">
+                        </div>
+                        <div class="w-1/2">
+                            <label for="card-cvv" class="block text-gray-700 font-bold mb-2">CVV</label>
+                            <input type="text" id="card-cvv" name="card_cvv" placeholder="123" class="w-full px-3 py-2 border rounded-lg" maxlength="3">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mb-4">
                     <label for="address" class="block text-gray-700 font-bold mb-2">Адрес доставки</label>
-                    <textarea name="address" id="address" rows="3" class="w-full px-3 py-2 border rounded-lg" required></textarea>
+                    <textarea placeholder="Ул. Пушкина дом 14 квартира 88" name="address" id="address" rows="3" class="w-full px-3 py-2 border rounded-lg" required></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label for="comment" class="block text-gray-700 font-bold mb-2">Комментарий к заказу (необязательно)</label>
+                    <textarea name="comment" id="comment" rows="3" class="w-full px-3 py-2 border rounded-lg" placeholder="Например: положить побольше соуса или не звонить при доставке"></textarea>
                 </div>
 
                 <button type="submit" name="create_order" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-secondary transition">
@@ -215,106 +251,155 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
     <?php include './includes/footer.php'; ?>
 
 
+    <script defer src="/js/cart-handler.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Увеличение количества товара
-            document.querySelectorAll('.btn-increase').forEach(button => {
-                button.addEventListener('click', async (e) => {
-                    const productId = e.target.dataset.productId;
+            const totalPriceEl = document.getElementById('total-price');
 
-                    try {
-                        const response = await fetch(window.location.href, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: `action=increase&product_id=${productId}`,
-                        });
+            function updateTotalPrice() {
+                let total = 0;
 
-                        if (response.status === 200) {
-                            // Обновляем отображение количества товара
-                            let quantityDisplay = Number(document.querySelector(`.quantity-display[data-product-id="${productId}"]`).innerText);
-                            if (quantityDisplay) {
-                                document.querySelector(`.quantity-display[data-product-id="${productId}"]`).innerText = `${quantityDisplay + 1}`;
-                            }
+                document.querySelectorAll('.quantity-display').forEach(el => {
+                    const quantity = parseInt(el.textContent);
+                    const productId = el.getAttribute('data-product-id');
+                    const priceEl = document.querySelector(`#cart-item-${productId} .text-gray-600`);
+                    const price = parseFloat(priceEl.textContent);
 
-                        }
-                    } catch (error) {
-                        console.error('Ошибка при увеличении количества:', error);
+                    if (!isNaN(quantity) && !isNaN(price)) {
+                        total += price * quantity;
                     }
+                });
+
+                totalPriceEl.textContent = total.toLocaleString('ru-RU', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            // Увеличение количества
+            document.querySelectorAll('.btn-increase').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const productId = btn.getAttribute('data-product-id');
+                    const qtyDisplay = document.querySelector(`.quantity-display[data-product-id="${productId}"]`);
+                    let qty = parseInt(qtyDisplay.textContent);
+                    qty++;
+                    qtyDisplay.textContent = qty;
+
+                    fetch('/cart-update.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            product_id: productId,
+                            quantity: qty
+                        })
+                    }).then(updateTotalPrice);
                 });
             });
 
-            // Уменьшение количества товара
-            document.querySelectorAll('.btn-decrease').forEach(button => {
-                button.addEventListener('click', async (e) => {
-                    const productId = e.target.dataset.productId;
+            // Уменьшение количества
+            document.querySelectorAll('.btn-decrease').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const productId = btn.getAttribute('data-product-id');
+                    const qtyDisplay = document.querySelector(`.quantity-display[data-product-id="${productId}"]`);
+                    let qty = parseInt(qtyDisplay.textContent);
+                    if (qty > 1) {
+                        qty--;
+                        qtyDisplay.textContent = qty;
 
-                    try {
-                        const response = await fetch(window.location.href, {
+                        fetch('/cart-update.php', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'Content-Type': 'application/json'
                             },
-                            body: `action=decrease&product_id=${productId}`,
-                        });
-
-                        if (response.status === 200) {
-                            // Обновляем отображение количества товара
-                            let quantityDisplay = Number(document.querySelector(`.quantity-display[data-product-id="${productId}"]`).innerText);
-                            if (quantityDisplay) {
-                                document.querySelector(`.quantity-display[data-product-id="${productId}"]`).innerText = `${quantityDisplay - 1}`;
-                            } else {
-                                // Если количество становится 0, удаляем элемент из DOM
-                                const cartItem = document.getElementById(`cart-item-${productId}`);
-                                if (cartItem) {
-                                    cartItem.remove();
-                                }
-                            }
-
-
-                        }
-                    } catch (error) {
-                        console.error('Ошибка при уменьшении количества:', error);
+                            body: JSON.stringify({
+                                product_id: productId,
+                                quantity: qty
+                            })
+                        }).then(updateTotalPrice);
                     }
                 });
             });
 
             // Удаление товара
-            document.querySelectorAll('.btn-remove').forEach(button => {
-                button.addEventListener('click', async (e) => {
-                    const productId = e.target.dataset.productId;
+            document.querySelectorAll('.btn-remove').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const productId = btn.getAttribute('data-product-id');
+                    const itemEl = document.getElementById(`cart-item-${productId}`);
 
-                    try {
-                        const response = await fetch(window.location.href, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: `action=remove&product_id=${productId}`,
-                        });
-
-                        if (response.status === 200) {
-                            // Удаляем элемент из DOM
-                            const cartItem = document.getElementById(`cart-item-${productId}`);
-                            if (cartItem) {
-                                cartItem.remove();
-                            }
-
-                            // Проверяем, остались ли товары в корзине
-                            const cartItems = document.querySelectorAll('.border.rounded-lg');
-                            if (cartItems.length === 0) {
-                                document.querySelector('section.container').innerHTML = `
-                            <p class="text-center text-gray-600">Корзина пуста.</p>
-                        `;
-                            }
-
-                        }
-                    } catch (error) {
-                        console.error('Ошибка при удалении товара:', error);
-                    }
+                    fetch('/cart-remove.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            product_id: productId
+                        })
+                    }).then(() => {
+                        itemEl.remove();
+                        updateTotalPrice();
+                    });
                 });
             });
+
+            updateTotalPrice();
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const paymentType = document.getElementById('payment_type');
+            const cardBlock = document.getElementById('payment-card-block');
+            const cardNumber = document.getElementById('card-number');
+            const cardExpiry = document.getElementById('card-expiry');
+            const cardCvv = document.getElementById('card-cvv');
+
+            // Показывать/скрывать поля карты и ставить required
+            paymentType.addEventListener('change', () => {
+                if (paymentType.value === 'Онлайн') {
+                    cardBlock.classList.remove('hidden');
+                    cardNumber.setAttribute('required', 'required');
+                    cardExpiry.setAttribute('required', 'required');
+                    cardCvv.setAttribute('required', 'required');
+                } else {
+                    cardBlock.classList.add('hidden');
+                    cardNumber.removeAttribute('required');
+                    cardExpiry.removeAttribute('required');
+                    cardCvv.removeAttribute('required');
+                }
+            });
+
+            // Инициализация при загрузке
+            if (paymentType.value === 'Онлайн') {
+                cardBlock.classList.remove('hidden');
+                cardNumber.setAttribute('required', 'required');
+                cardExpiry.setAttribute('required', 'required');
+                cardCvv.setAttribute('required', 'required');
+            }
+        });
+
+        form.addEventListener('submit', function(e) {
+            if (paymentType.value === 'Онлайн') {
+                const cardNumber = cardNumber.value.replace(/\s+/g, '');
+                const cardExpiry = cardExpiry.value;
+                const cardCvv = cardCvv.value;
+
+                if (!/^\d{16}$/.test(cardNumber)) {
+                    alert('Неверный формат номера карты.');
+                    e.preventDefault();
+                }
+
+                if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry)) {
+                    alert('Неверный срок действия карты.');
+                    e.preventDefault();
+                }
+
+                if (!/^\d{3}$/.test(cardCvv)) {
+                    alert('Неверный CVV код.');
+                    e.preventDefault();
+                }
+            }
         });
     </script>
 

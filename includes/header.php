@@ -1,7 +1,3 @@
-<?php
-// session_start(); // Запускаем сессию
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -22,11 +18,15 @@
 <body>
     <header class="bg-background-dark p-5 flex flex-col md:flex-row justify-between items-center gap-10">
         <div class="logo">
-            <p class="text-2xl font-black text-white text-accent">Coffee & Cozy</p>
+            <a href="/" class="text-2xl font-black text-white text-accent">Тепло и уют</a>
         </div>
         <nav class="flex flex-col md:flex-row justify-between items-center gap-5">
             <a class="link" href="./index.php">Меню</a>
             <a class="link" href="./cart.php">Корзина</a>
+            <a class="link" href="./contacts.php">Контакты</a>
+            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === "admin") { ?>
+                <a class="link" href="./admin.php">Админ панель</a>
+            <?php } ?>
             <?php if (isset($_SESSION['user_id'])): ?>
                 <!-- Пользователь авторизован -->
                 <a class="link" href="./account.php">Личный кабинет</a>

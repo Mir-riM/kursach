@@ -39,8 +39,8 @@ function getOrderItems($pdo, $order_id)
     <?php include './includes/header.php'; ?>
 
     <section class="flex-[1] container mx-auto p-4 mt-10">
-        <h1 class="text-3xl font-bold text-center mb-6">Личный кабинет</h1>
-
+        <h2 class="text-3xl font-bold text-center mb-2">Личный кабинет</h2>
+        <p class="text-xl font-medium text-center mb-6">История заказов</p>
         <?php if (empty($orders)): ?>
             <p class="text-center text-gray-600">У вас пока нет заказов.</p>
         <?php else: ?>
@@ -51,18 +51,9 @@ function getOrderItems($pdo, $order_id)
                         <p class="text-gray-600">Дата: <?= htmlspecialchars($order['created_at']) ?></p>
                         <p class="text-accent font-bold">Статус:
                             <?php
-                            switch (htmlspecialchars($order['status'])) {
-                                case 'approved':
-                                    echo htmlspecialchars("Подтверждено");
-                                    break;
-                                case 'pending':
-                                    echo htmlspecialchars("В ожидании");
-                                    break;
-                                case 'rejected':
-                                    echo htmlspecialchars("Отменено");
-                                    break;
-                            }
+                            echo $order['status'];
                             ?>
+
                         </p>
                         <p class="text-accent font-bold">Общая стоимость: <?= htmlspecialchars($order['total_price']) ?>₽</p>
 

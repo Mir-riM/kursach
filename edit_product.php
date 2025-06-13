@@ -34,13 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($name) || empty($price)) {
         $error = "Имя и цена обязательны для заполнения.";
     } else {
-        // Генерация имени файла
-        $image_name = (str_replace(' ', '-', $name)) . '.png';
-        $image_path = __DIR__ . './assets/img/product/' . $image_name;
+        // Оставляем текущее изображение по умолчанию
+        $image_url = $product['image_url'];
 
-        // Сохранение изображения
+        // Если загружено новое изображение — обновляем
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $image_name = strtolower(str_replace(' ', '-', $name)) . '.png';
+            $image_path = __DIR__ . '/assets/img/product/' . $image_name;
+
             move_uploaded_file($_FILES['image']['tmp_name'], $image_path);
+            $image_url = '/assets/img/product/' . $image_name;
         }
 
         // Обновление товара в базе данных
@@ -49,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SET name = ?, price = ?, description = ?, image_url = ?, category_id = ?
             WHERE id = ?
         ");
-        $stmt->execute([$name, $price, $description, '/assets/img/product/' . $image_name, $category_id, $product_id]);
+        $stmt->execute([$name, $price, $description, $image_url, $category_id, $product_id]);
 
         $_SESSION['success'] = "Товар успешно обновлен!";
         header("Location: admin.php");
