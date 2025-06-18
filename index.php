@@ -80,7 +80,9 @@ $totalQuantity = getTotalCartQuantity();
     <?php foreach ($categories as $category): ?>
         <!-- Вывод названия категории -->
         <div class="mb-8">
-            <h2 class="heading-md text-center font-bold text-accent mb-10"><?= htmlspecialchars($category['name']) ?></h2>
+            <h2 class="heading-md text-center font-bold text-accent mb-10">
+                <?= htmlspecialchars($category['name']) ?>
+            </h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <?php foreach ($products as $product): ?>
                     <?php if ($product['category_id'] == $category['id']): ?>

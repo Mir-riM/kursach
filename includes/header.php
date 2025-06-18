@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Кофейня</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../tailwind.config.js"></script>
+    <script src="../js/tailwind.min.js"></script>
+    <script defer src="../tailwind.config.js"></script>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" type="image/png" href="../assets/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />

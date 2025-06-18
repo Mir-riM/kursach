@@ -16,6 +16,7 @@ $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_product'])) {
     $name = trim($_POST['name']);
     $price = (float)$_POST['price'];
+    $weight = (float)$_POST['weight'];
     $description = trim($_POST['description']);
     $category_id = (int)($_POST['category_id'] ?? 0);
 
@@ -24,11 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_product'])) {
     } else {
         // Генерация имени файла
         $image_name = str_replace(' ', '-', $name) . '.png';
-        $image_path = __DIR__ . './assets/img/product/' . $image_name;
+        $image_path = __DIR__ . '/assets/img/product/' . $image_name;
 
         // Создание директории, если её нет
-        if (!is_dir(__DIR__ . './assets/img/product/')) {
-            mkdir(__DIR__ . './assets/img/product/', 0777, true);
+        if (!is_dir(__DIR__ . '/assets/img/product/')) {
+            mkdir(__DIR__ . '/assets/img/product/', 0777, true);
         }
 
         // Сохранение изображения
@@ -38,10 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_product'])) {
 
         // Добавление товара в базу данных
         $stmt = $pdo->prepare("
-            INSERT INTO products (name, price, description, image_url, category_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO products (name, price, description, image_url, category_id, weight)
+            VALUES (?, ?, ?, ?, ?, ?)
         ");
-        $stmt->execute([$name, $price, $description, '/assets/img/product/' . $image_name, $category_id]);
+        $stmt->execute([$name, $price, $description, '/assets/img/product/' . $image_name, $category_id, $weight]);
 
         $_SESSION['success'] = "Товар успешно создан!";
         header("Location: admin.php");
@@ -91,6 +92,10 @@ $products = $stmtProducts->fetchAll(PDO::FETCH_ASSOC);
             <div class="mb-4">
                 <label for="description" class="block text-gray-700 font-bold mb-2">Описание</label>
                 <textarea name="description" id="description" rows="3" class="w-full px-3 py-2 border rounded-lg"></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="weight" class="block text-gray-700 font-bold mb-2">Вес</label>
+                <input type="number" step="1" name="weight" id="weight" class="w-full px-3 py-2 border rounded-lg" required>
             </div>
             <div class="mb-4">
                 <label for="category_id" class="block text-gray-700 font-bold mb-2">Категория</label>
