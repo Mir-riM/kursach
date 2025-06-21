@@ -131,12 +131,9 @@ $totalQuantity = getTotalCartQuantity();
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const addToCartButtons = document.querySelectorAll('.add-to-cart');
-
         addToCartButtons.forEach(button => {
             button.addEventListener('click', async (e) => {
                 const productId = e.target.dataset.productId;
-
-
                 const response = await fetch(window.location.href, {
                     method: 'POST',
                     headers: {
@@ -144,11 +141,9 @@ $totalQuantity = getTotalCartQuantity();
                     },
                     body: `product_id=${productId}`,
                 });
-
                 if (response.status !== 200) {
                     alert("Ошибка при добавлении товара, попробуйте снова")
                 }
-
             });
         });
     });

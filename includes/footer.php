@@ -11,6 +11,7 @@
             <a href="/privacy-policy.php" class="text-gray-300 hover:text-white transition duration-300 sm:text-nowrap">Политика конфиденциальности</a>
             <a href="../cart.php" class="text-gray-300 hover:text-white transition duration-300">Корзина</a>
             <a href="../index.php" class="text-gray-300 hover:text-white transition duration-300">Меню</a>
+            <a href="../contacts.php" class="text-gray-300 hover:text-white transition duration-300">Контакты</a>
         </div>
     </div>
 

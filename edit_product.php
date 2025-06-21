@@ -27,6 +27,7 @@ $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
 // Обработка обновления товара
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
+    $weight = trim($_POST['weight']);
     $price = (float)$_POST['price'];
     $description = trim($_POST['description']);
     $category_id = (int)($_POST['category_id'] ?? 0);
@@ -49,10 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Обновление товара в базе данных
         $stmt = $pdo->prepare("
             UPDATE products 
-            SET name = ?, price = ?, description = ?, image_url = ?, category_id = ?
+            SET name = ?, price = ?, description = ?, image_url = ?, category_id = ?, weight = ?
             WHERE id = ?
         ");
-        $stmt->execute([$name, $price, $description, $image_url, $category_id, $product_id]);
+        $stmt->execute([$name, $price, $description, $image_url, $category_id, $weight, $product_id]);
 
         $_SESSION['success'] = "Товар успешно обновлен!";
         header("Location: admin.php");
@@ -83,6 +84,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="mb-4">
                 <label for="price" class="block text-gray-700 font-bold mb-2">Цена</label>
                 <input type="number" step="0.01" name="price" id="price" value="<?= htmlspecialchars($product['price']) ?>" class="w-full px-3 py-2 border rounded-lg" required>
+            </div>
+            <div class="mb-4">
+                <label for="weight" class="block text-gray-700 font-bold mb-2">Вес</label>
+                <input type="number" step="0.01" name="weight" id="weight" value="<?= htmlspecialchars($product['weight']) ?>" class="w-full px-3 py-2 border rounded-lg" required>
             </div>
             <div class="mb-4">
                 <label for="description" class="block text-gray-700 font-bold mb-2">Описание</label>

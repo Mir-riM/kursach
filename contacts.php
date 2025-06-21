@@ -1,3 +1,8 @@
+<?php
+
+session_start();
+?>
+
 <div class="min-h-[100vh] flex flex-col">
   <?php include './includes/header.php'; ?>
 
