@@ -86,7 +86,7 @@ $products = $stmtProducts->fetchAll(PDO::FETCH_ASSOC);
         <nav class="w-full mx-auto p-5 flex justify-center items-center gap-5">
             <a href="./admin.php" class="btn">Товары</a>
             <a href="./admin_orders.php" class="btn">Заявки</a>
-            <a href="./admin_statistic.php" class="btn">Статистика</a>
+            <a href="./admin_statistics.php" class="btn">Статистика</a>
         </nav>
 
         <!-- Tabs -->
